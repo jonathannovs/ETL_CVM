@@ -1,0 +1,28 @@
+# Ignorar ambiente virtual
+venv/
+.env/
+.venv/
+
+# Ignorar arquivos Python compilados
+__pycache__/
+*.py[cod]
+
+# Checkpoints Jupyter
+.ipynb_checkpoints/
+
+# Configurações do VS Code
+.vscode/
+
+# Arquivos de dados comuns
+*.csv
+*.tsv
+*.parquet
+*.xls
+*.xlsx
+*.json
+*.zip
+*.log
+
+# Arquivos temporários
+*.tmp
+*.bak
