@@ -1,0 +1,74 @@
+import requests
+import pandas as pd
+import zipfile
+import os
+from io import BytesIO
+import logging
+from datetime import datetime
+from tqdm import tqdm
+import boto3
+from botocore.exceptions import ClientError
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class ExtractCvm:
+
+    def __init__(self,start_date, bucket_name, end_date=None):
+        self.start_date = start_date
+        self.end_date = end_date or datetime.now().date()
+        self.end_year = self.end_date.year
+        self.end_month = self.end_date.month
+        self.bucket_name = bucket_name
+        self.s3 = boto3.client(
+            "s3",
+            endpoint_url="http://localstack:4566",  
+            aws_access_key_id="test",            
+            aws_secret_access_key="test",
+            region_name="us-east-1"
+        )
+
+    def create_bucket(self):
+        try:
+            self.s3.create_bucket(Bucket=self.bucket_name)
+            logging.info(f"Bucket '{self.bucket_name}' criado com sucesso.")
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
+                logging.exception(f"Bucket '{self.bucket_name}' já existe.")
+            else:
+                logging.exception(f"Erro ao criar o bucket: {e}")
+
+    def extract_info_diary(self):
+
+        periodos = []
+        for year in range(self.start_date, self.end_year + 1):
+            for month in range(1, 13):
+                if year == self.end_year and month > self.end_month:
+                    break
+                periodos.append((year, month))
+
+        for year, month in tqdm(periodos, desc="Baixando relatórios", unit="mês"):
+            yyyymm = f"{year}{month:02d}"
+            url = f"https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{yyyymm}.zip"
+
+            try:
+                response = requests.get(url)
+                response.raise_for_status()
+                zip_file_in_memory = BytesIO(response.content)
+
+                with zipfile.ZipFile(zip_file_in_memory) as zf:
+                    file_name = f"inf_diario_fi_{yyyymm}.csv"
+
+                    with zf.open(file_name) as file:
+                        s3_key = f"raw/{file_name}"
+                        self.s3.upload_fileobj(file, self.bucket_name, s3_key)
+
+                    logging.info(f"Arquivo '{file_name}' enviado para o S3 no caminho '{s3_key}'.")
+
+
+            except requests.exceptions.HTTPError as err:
+                logging.exception(f"Erro HTTP: O arquivo para {month:02d}/{year} não foi encontrado ou o servidor retornou um erro.")
+
+            except Exception as err:
+                logging.exception(f"Erro inesperado em {month:02d}/{year}: {err}")
+
+

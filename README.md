@@ -8,10 +8,18 @@ $ docker exec -e HOME=/root -it spark-master spark-submit --master spark://spark
 # ou
 
 # entrar no container spark
-$ docker exec -it spark-master bash
 
-# executar o scrip dentro do container
+# instalar pacotes
+$ pip install -r /app/requirements.txt  #instalar pacotes
+
+# entrar no container
+$ docker exec -it spark-master bash 
+
+# executar o scrip dentro do container spark
 $ python /app/main.py
 
 # acessar spark ui
 http://localhost:8080
+
+# para rodar com job spark 
+$ docker exec -it spark-master spark-submit /app/main.py  $
