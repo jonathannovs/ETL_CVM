@@ -2,38 +2,41 @@
 import boto3
 from pyspark.sql import SparkSession
 
-class Transform:
+# class Transform:
     # def __init__(self):
-    #     self.spark = SparkSession.builder \
-    #         .appName("Teste PySpark") \
-    #         .master("spark://spark-master:7077") \
-    #         .getOrCreate()
+    #     self.s3 = boto3.client(
+    #         "s3",
+    #         endpoint_url="http://localstack:4566",  # ou "http://localhost:4566" se estiver fora do container
+    #         aws_access_key_id="test",
+    #         aws_secret_access_key="test",
+    #         region_name="us-east-1"
+    #     )
 
     # def run(self):
-    #     data = [("Alice", 25), ("Bob", 30), ("Carol", 27)]
-    #     df = self.spark.createDataFrame(data, ["Nome", "Idade"])
-    #     df.show()
+    #     bucket_name = "s3-cvm-fii"
 
-    # def stop(self):
-    #     self.spark.stop()
-import boto3
+    #     response = self.s3.list_objects_v2(Bucket=bucket_name)
 
-# Cliente S3 apontando para o LocalStack
-s3 = boto3.client(
-    "s3",
-    endpoint_url="http://localhost:4566",  # ou "http://localstack:4566" se estiver dentro do container
-    aws_access_key_id="test",
-    aws_secret_access_key="test",
-    region_name="us-east-1"
-)
+    #     if "Contents" in response:
+    #         print("Arquivos encontrados no bucket:")
+    #         for obj in response["Contents"]:
+    #             print(f"- {obj['Key']}")
+    #     else:
+    #         print("Nenhum arquivo encontrado no bucket.")
 
-bucket_name = "s3-cvm-fii"
+###### job spark 
 
-response = s3.list_objects_v2(Bucket=bucket_name)
+class Transform:
+    def __init__(self):
+        self.spark = SparkSession.builder \
+            .appName("Teste PySpark") \
+            .master("spark://spark-master:7077") \
+            .getOrCreate()
 
-if "Contents" in response:
-    print("Arquivos encontrados no bucket:")
-    for obj in response["Contents"]:
-        print(f"- {obj['Key']}")
-else:
-    print("Nenhum arquivo encontrado no bucket.")
+    def run(self):
+        data = [("Alice", 25), ("Bob", 30), ("Carol", 27)]
+        df = self.spark.createDataFrame(data, ["Nome", "Idade"])
+        df.show()
+
+    def stop(self):
+        self.spark.stop()

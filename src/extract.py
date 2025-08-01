@@ -38,7 +38,7 @@ class ExtractCvm:
                 logging.exception(f"Erro ao criar o bucket: {e}")
 
     def extract_info_diary(self):
-
+   
         periodos = []
         for year in range(self.start_date, self.end_year + 1):
             for month in range(1, 13):
@@ -48,7 +48,19 @@ class ExtractCvm:
 
         for year, month in tqdm(periodos, desc="Baixando relatórios", unit="mês"):
             yyyymm = f"{year}{month:02d}"
+            file_name = f"inf_diario_fi_{yyyymm}.csv"
+            s3_key = f"raw/{file_name}"
             url = f"https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{yyyymm}.zip"
+            
+                   # Verifica se o arquivo já existe no bucket
+            try:
+                self.s3.head_object(Bucket=self.bucket_name, Key=s3_key)
+                logging.info(f"O arquivo '{s3_key}' já existe no bucket. Pulando download.")
+                continue  # pula para o próximo mês
+            except ClientError as e:
+                if e.response['Error']['Code'] != "404":
+                    logging.exception(f"Erro ao verificar existência do arquivo '{s3_key}': {e}")
+                    continue  # pula esse mês por precaução
 
             try:
                 response = requests.get(url)
@@ -56,10 +68,7 @@ class ExtractCvm:
                 zip_file_in_memory = BytesIO(response.content)
 
                 with zipfile.ZipFile(zip_file_in_memory) as zf:
-                    file_name = f"inf_diario_fi_{yyyymm}.csv"
-
                     with zf.open(file_name) as file:
-                        s3_key = f"raw/{file_name}"
                         self.s3.upload_fileobj(file, self.bucket_name, s3_key)
 
                     logging.info(f"Arquivo '{file_name}' enviado para o S3 no caminho '{s3_key}'.")
