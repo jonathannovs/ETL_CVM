@@ -13,9 +13,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 class ExtractCvm:
 
-    def __init__(self,start_date, bucket_name, end_date=None):
+    def __init__(self,start_date:int, bucket_name:str, end_date:datetime=None):
         self.start_date = start_date
-        self.end_date = end_date or datetime.now().date()
+        self.end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if isinstance(end_date, str) else end_date or datetime.now().date()
         self.end_year = self.end_date.year
         self.end_month = self.end_date.month
         self.bucket_name = bucket_name
