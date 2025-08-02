@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 class ExtractCvm:
 
-    def __init__(self,start_date:int, bucket_name:str, end_date:datetime=None):
+    def __init__(self,start_date:int, bucket_name:str, end_date=None):
         self.start_date = start_date
         self.end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if isinstance(end_date, str) else end_date or datetime.now().date()
         self.end_year = self.end_date.year
@@ -46,7 +46,7 @@ class ExtractCvm:
                     break
                 periodos.append((year, month))
 
-        for year, month in tqdm(periodos, desc="Baixando relatórios", unit="mês"):
+        for year, month in tqdm(periodos, desc="Baixando relatórios", unit="file"):
             yyyymm = f"{year}{month:02d}"
             file_name = f"inf_diario_fi_{yyyymm}.csv"
             s3_key = f"raw/{file_name}"

@@ -3,3 +3,4 @@ botocore
 pandas
 requests
 tqdm
+psycopg2-binary

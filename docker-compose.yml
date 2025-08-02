@@ -13,15 +13,16 @@ services:
       - SPARK_SSL_ENABLED=no
       - SPARK_MASTER_PORT=7077
       - SPARK_MASTER_WEBUI_PORT=8080
-      - HOME=/root                       # <- apontando para diretório válido
+      - HOME=/root                       
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
+      #-PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.postgresql:postgresql:42.6.0 pyspark-shell
+      - PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell
     ports:
       - "7077:7077"       
       - "8080:8080"       
     volumes:
-      #- ./src:/app
       - ./src:/src
       - ./app:/app
 
@@ -36,8 +37,8 @@ services:
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=1G
-      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=4G
+      - SPARK_WORKER_CORES=2
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
@@ -45,6 +46,7 @@ services:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
+      - PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell
     networks:
       - spark-network
 
@@ -79,9 +81,27 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
       - PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell
     volumes:
-      - ./volume:/home/jovyan/work
+      - ./notebooks:/home/jovyan/work
     depends_on:
       - spark-master
+    networks:
+      - spark-network
+  
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: JONANOV
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: CVM
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # 👈 EXPOE A PORTA
+    # healthcheck:
+    # #   test: ["CMD", "pg_isready", "-U", "JONANOV"]
+    #   interval: 5s
+    #   retries: 5
+    restart: always
     networks:
       - spark-network
 
@@ -89,3 +109,6 @@ services:
 networks:
   spark-network:
     driver: bridge
+
+volumes:
+  postgres-db-volume:
