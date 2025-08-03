@@ -16,9 +16,9 @@ class LoadDw:
             region_name="us-east-1"
         )
 
-    def consulta_bucket(self):
+    def consulta_bucket(self, prefix):
         bucket_name = "s3-cvm-fii"
-        response = self.s3.list_objects_v2(Bucket=bucket_name, Prefix="stage/")
+        response = self.s3.list_objects_v2(Bucket=bucket_name, Prefix=f"{prefix}/")
 
         if "Contents" in response:
             print("Arquivos encontrados no bucket:")

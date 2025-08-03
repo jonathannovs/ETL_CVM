@@ -46,7 +46,7 @@ class ExtractCvm:
                     break
                 periodos.append((year, month))
 
-        for year, month in tqdm(periodos, desc="Baixando relatórios", unit="file"):
+        for year, month in tqdm(periodos, desc="Baixando relatórios", unit=" file"):
             yyyymm = f"{year}{month:02d}"
             file_name = f"inf_diario_fi_{yyyymm}.csv"
             s3_key = f"raw/{file_name}"
