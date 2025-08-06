@@ -37,7 +37,7 @@ class ExtractCvm:
             else:
                 logging.exception(f"Erro ao criar o bucket: {e}")
 
-    def extract_info_diary(self):
+    def extract_info_diary(self,prefix):
    
         periodos = []
         for year in range(self.start_date, self.end_year + 1):
@@ -49,10 +49,10 @@ class ExtractCvm:
         for year, month in tqdm(periodos, desc="Baixando relatórios", unit=" file"):
             yyyymm = f"{year}{month:02d}"
             file_name = f"inf_diario_fi_{yyyymm}.csv"
-            s3_key = f"raw/{file_name}"
+            prefix=prefix
+            s3_key = f"{prefix}/{file_name}"
             url = f"https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{yyyymm}.zip"
-            
-                   # Verifica se o arquivo já existe no bucket
+
             try:
                 self.s3.head_object(Bucket=self.bucket_name, Key=s3_key)
                 logging.info(f"O arquivo '{s3_key}' já existe no bucket. Pulando download.")

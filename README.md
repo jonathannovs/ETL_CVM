@@ -8,7 +8,7 @@ $ docker compose up -d
 
 # entrar dentro do container spark instalar pacotes voltar para o docker e rodar o main.py
 
-docker exec -it spark-master pip install -r /app/requirements.txt
+$ docker exec -it spark-master pip install -r /app/requirements.txt
 $ docker exec -it spark-master spark-submit /app/main.py
 
 # acessar spark ui

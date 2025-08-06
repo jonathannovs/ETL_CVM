@@ -35,7 +35,7 @@ class Transform:
         hadoop_conf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
         hadoop_conf.set("fs.s3a.committer.name", "directory")
         
-    def read_s3_files(self):
+    def read_s3_files(self,prefix):
 
         schema = StructType([
             StructField("TP_FUNDO_CLASSE", StringType(), True),
@@ -56,7 +56,7 @@ class Transform:
                 .option("encoding", "latin1") \
                 .option("sep", ";") \
                 .schema(schema) \
-                .csv("s3a://s3-cvm-fii/raw/*.csv")
+                .csv(f"s3a://s3-cvm-fii/{prefix}/*.csv")
             logging.info(' ############### \u2705 [ARQUIVOS LIDOS] #################')
         except Exception as e:
             print(f'\u274c{e}')
@@ -87,8 +87,8 @@ class Transform:
         return df
 
     def transform_teste(self,df):
-        # df = df.limit(5)
-        df = df.filter(f.col("Ano") == 2025)
+        df = df.limit(5)
+        #df = df.filter(f.col("Ano") == 2025)
 
         logging.info("\u2705 ################### [DATAFRAME <TESTE> ENVIADO PARA UPLOAD] ##################")
         return df

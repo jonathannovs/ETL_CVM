@@ -25,6 +25,7 @@ services:
     volumes:
       - ./src:/src
       - ./app:/app
+      - ./sql:/sql
 
     networks:
       - spark-network
@@ -50,27 +51,6 @@ services:
     networks:
       - spark-network
     
-  # spark-worker-2:
-  #   image: bitnami/spark:3.5.0
-  #   container_name: spark-worker-2
-  #   depends_on:
-  #     - spark-master
-  #   environment:
-  #     - SPARK_MODE=worker
-  #     - SPARK_MASTER_URL=spark://spark-master:7077
-  #     - SPARK_WORKER_MEMORY=2G
-  #     - SPARK_WORKER_CORES=2
-  #     - SPARK_RPC_AUTHENTICATION_ENABLED=no
-  #     - SPARK_RPC_ENCRYPTION_ENABLED=no
-  #     - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-  #     - SPARK_SSL_ENABLED=no
-  #     - AWS_ACCESS_KEY_ID=test
-  #     - AWS_SECRET_ACCESS_KEY=test
-  #     - AWS_DEFAULT_REGION=us-east-1
-  #     - PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell
-  #   networks:
-  #     - spark-network
-
 
   localstack:
     container_name: localstack
@@ -110,6 +90,7 @@ services:
   
   postgres:
     image: postgres:13
+    container_name: postgres
     environment:
       POSTGRES_USER: JONANOV
       POSTGRES_PASSWORD: admin
@@ -117,11 +98,10 @@ services:
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     ports:
-      - "5432:5432"  # 👈 EXPOE A PORTA
+      - "5432:5432"  
     restart: always
     networks:
       - spark-network
-
 
 networks:
   spark-network:
