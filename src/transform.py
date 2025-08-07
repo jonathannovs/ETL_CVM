@@ -4,28 +4,15 @@ from pyspark.sql.window import Window as W
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, DateType
 
-import boto3
 import logging 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class Transform:
 
-    def __init__(self):
-        self.spark = SparkSession.builder \
-                        .appName("Teste PySpark") \
-                        .master("spark://spark-master:7077") \
-                        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4") \
-                        .getOrCreate()
-        
-        # self.s3 = boto3.client(
-        #     "s3",
-        #     endpoint_url="http://localstack:4566", 
-        #     aws_access_key_id="test",
-        #     aws_secret_access_key="test",
-        #     region_name="us-east-1"
-        # )
-        #self.spark.conf.set("spark.sql.shuffle.partitions", "200")
+    def __init__(self, spark: SparkSession):
+
+        self.spark = spark
 
         hadoop_conf = self.spark._jsc.hadoopConfiguration()
         hadoop_conf.set("fs.s3a.endpoint", "http://localstack:4566")
@@ -97,8 +84,7 @@ class Transform:
         if df is None:
             logging.warning("\u274c DataFrame de entrada está vazio. Nada será escrito.")
             return None
-        # num_partitions = 200
-        # df = df.repartition(num_partitions)
+
         try:
             df.write \
                 .mode("overwrite") \

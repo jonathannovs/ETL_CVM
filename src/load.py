@@ -13,12 +13,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 class LoadDw:
 
-    def __init__(self, prefix, host, database, user, password):
-        self.spark = SparkSession.builder \
-                                .appName("Teste PySpark") \
-                                .master("spark://spark-master:7077") \
-                                .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4") \
-                                .getOrCreate()
+    def __init__(self, spark: SparkSession, prefix:str, host:str, database, user, password):
+        self.spark = spark
         self.s3 = boto3.client("s3",
             endpoint_url="http://localstack:4566", 
             aws_access_key_id="test",
@@ -43,10 +39,18 @@ class LoadDw:
         else:
             print( 'bucket vazio')
 
-    def delete_files(self,path):
-        bucket = self.s3.Bucket(f'{path}')
-        bucket.objects.all().delete()
-        logging.warning('################## [ARQUIVOS DELETADOS DO BUCKET] ##################')
+    def delete_files(self, bucket_name, prefix):
+        response = self.s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+
+        if "Contents" in response:
+            objects_to_delete = [{"Key": obj["Key"]} for obj in response["Contents"]]
+            self.s3.delete_objects(
+                Bucket=bucket_name,
+                Delete={"Objects": objects_to_delete}
+            )
+            logging.warning(f'################## [ARQUIVOS DELETADOS DO BUCKET {bucket_name}/{prefix}] ##################')
+        else:
+            logging.info(f"Nenhum arquivo encontrado com prefixo {prefix} no bucket {bucket_name}")
 
     def create_table(self,filepath):
         try:
@@ -76,6 +80,9 @@ class LoadDw:
         try:
             df_parquet = self.spark.read.parquet(f"s3a://s3-cvm-fii/{self.prefix}/*.parquet")
             df_parquet.show()
+            print('testando conexao...')
+            time.sleep(5)
+
             df_parquet.write.jdbc(
                 url="jdbc:postgresql://postgres:5432/CVM",
                 table="cvm.fundos",
@@ -90,19 +97,3 @@ class LoadDw:
             raise
 
 
-# from pyspark.sql import SparkSession
-
-# spark = SparkSession.builder.appName("load_dw").getOrCreate()
-
-# df = spark.read.parquet("/src/data.parquet")  # Parquet em volume mapeado
-
-# df.write.jdbc(
-#     url="jdbc:postgresql://postgres:5432/CVM",
-#     table="tabela_destino",
-#     mode="overwrite",
-#     properties={
-#         "user": "JONANOV",
-#         "password": "admin",
-#         "driver": "org.postgresql.Driver"
-#     }
-# )

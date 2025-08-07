@@ -1,6 +1,7 @@
 import sys
 import logging 
 import time
+from pyspark.sql import SparkSession 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 sys.path.append("/src")  
@@ -16,32 +17,44 @@ DB_PASSWORD = 'admin'
 
 def main():
 
-#     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
-#     ext = ExtractCvm(start_date=2022, bucket_name="s3-cvm-fii")
-#     ext.create_bucket()
-#     ext.extract_info_diary(prefix='raw')
+    spark = SparkSession.builder \
+        .appName("Pipeline CVM") \
+        .master("spark://spark-master:7077") \
+        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4")\
+        .config("spark.jars", "/opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar") \
+        .config("spark.driver.extraClassPath", "/opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar") \
+        .config("spark.executor.extraClassPath", "/opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar") \
+        .getOrCreate()
 
-#     logging.info('[# 2 -------- TRANSFORMANDO DADOS----------#]')
-#     trans = Transform()
-#     df_raw = trans.read_s3_files(prefix='raw')
-#     df_transformed = trans.transform_data(df_raw)
-#     teste = trans.transform_teste(df_transformed) 
-#     trans.upload_stage(teste, prefix="teste")
 
-#     logging.info('\n[# 3 -------- CONSULTANDO S3 ----------#]')
-# #
-    load = LoadDw(prefix = 'teste', 
+    logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
+    ext = ExtractCvm(start_date=2022, bucket_name="s3-cvm-fii")
+    ext.create_bucket()
+    ext.extract_info_diary(prefix='raw')
+
+    logging.info('[# 2 -------- TRANSFORMANDO DADOS----------#]')
+    trans = Transform(spark)
+    df_raw = trans.read_s3_files(prefix='raw')
+    df_transformed = trans.transform_data(df_raw)
+    teste = trans.transform_teste(df_transformed) 
+    trans.upload_stage(teste, prefix="teste")
+
+    logging.info('[# 3 -------- CONSULTANDO S3 ----------#]')
+
+    load = LoadDw(spark, prefix = 'teste', 
                 host="postgres",
                 database=DB_NAME,
                 user=DB_USER,
                 password=DB_PASSWORD)
     load.consulta_bucket()
     time.sleep(5)
-    load.delete_files(path='s3a://s3-cvm-fii/teste')
-    # load.create_table(filepath='/sql/create_tables.sql')
-    # load.insert_data()
+    #load.delete_files('s3-cvm-fii','teste')
+    load.create_table(filepath='/sql/create_tables.sql')
+    load.insert_data()
 
-    logging.info('\n[#################### PIPELINE FINALIZADO #################]')
+    logging.info('[#################### PIPELINE FINALIZADO #################]')
+
+    spark.stop()
 
 if __name__ == "__main__":
     main()

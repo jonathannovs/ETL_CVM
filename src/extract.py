@@ -60,8 +60,7 @@ class ExtractCvm:
             except ClientError as e:
                 if e.response['Error']['Code'] != "404":
                     logging.exception(f"Erro ao verificar existência do arquivo '{s3_key}': {e}")
-                    continue  # pula esse mês por precaução
-
+                    continue  
             try:
                 response = requests.get(url)
                 response.raise_for_status()

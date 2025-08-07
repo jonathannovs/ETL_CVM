@@ -1,5 +1,3 @@
-
-
 services:
   spark-master:
     image: bitnami/spark:3.5.0
@@ -17,8 +15,8 @@ services:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
-      #-PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.postgresql:postgresql:42.6.0 pyspark-shell
-      - PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell
+      #- PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.postgresql:postgresql:42.6.0 pyspark-shell
+     
     ports:
       - "7077:7077"       
       - "8080:8080"       
@@ -26,6 +24,7 @@ services:
       - ./src:/src
       - ./app:/app
       - ./sql:/sql
+      - ./jars:/opt/bitnami/spark/jars-custom
 
     networks:
       - spark-network
@@ -47,16 +46,21 @@ services:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
-      - PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell
+      #- PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.postgresql:postgresql:42.6.0 pyspark-shell
+    volumes:
+      - ./src:/src
+      - ./app:/app
+      - ./sql:/sql
+      - ./jars:/opt/bitnami/spark/jars-custom
+
     networks:
       - spark-network
     
-
   localstack:
     container_name: localstack
     image: localstack/localstack
     ports:
-      - "4566:4566"         # LocalStack Gateway
+      - "4566:4566"         
       - "127.0.0.1:4510-4559:4510-4559"
     environment:
       - DEBUG=${DEBUG:-1}
@@ -80,7 +84,8 @@ services:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
-      - PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell
+      #- PYSPARK_SUBMIT_ARGS=--packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.postgresql:postgresql:42.6.0 pyspark-shell
+
     volumes:
       - ./notebooks:/home/jovyan/work
     depends_on:
@@ -109,3 +114,4 @@ networks:
 
 volumes:
   postgres-db-volume:
+
