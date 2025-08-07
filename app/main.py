@@ -28,31 +28,36 @@ def main():
 
 
     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
+    time.sleep(5)
+
     ext = ExtractCvm(start_date=2022, bucket_name="s3-cvm-fii")
     ext.create_bucket()
     ext.extract_info_diary(prefix='raw')
 
     logging.info('[# 2 -------- TRANSFORMANDO DADOS----------#]')
+    time.sleep(5)
+
     trans = Transform(spark)
     df_raw = trans.read_s3_files(prefix='raw')
     df_transformed = trans.transform_data(df_raw)
     teste = trans.transform_teste(df_transformed) 
-    trans.upload_stage(teste, prefix="teste")
-
+    trans.upload_stage(teste, prefix="stage/2025")
+    
     logging.info('[# 3 -------- CONSULTANDO S3 ----------#]')
+    time.sleep(5)
 
-    load = LoadDw(spark, prefix = 'teste', 
+    load = LoadDw(spark, prefix = 'stage/2025', 
                 host="postgres",
                 database=DB_NAME,
                 user=DB_USER,
                 password=DB_PASSWORD)
     load.consulta_bucket()
-    time.sleep(5)
     #load.delete_files('s3-cvm-fii','teste')
     load.create_table(filepath='/sql/create_tables.sql')
     load.insert_data()
 
     logging.info('[#################### PIPELINE FINALIZADO #################]')
+    time.sleep(2)
 
     spark.stop()
 

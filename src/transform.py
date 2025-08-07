@@ -74,8 +74,8 @@ class Transform:
         return df
 
     def transform_teste(self,df):
-        df = df.limit(5)
-        #df = df.filter(f.col("Ano") == 2025)
+        #df = df.limit(5)
+        df = df.filter(f.col("Ano") == 2025)
 
         logging.info("\u2705 ################### [DATAFRAME <TESTE> ENVIADO PARA UPLOAD] ##################")
         return df

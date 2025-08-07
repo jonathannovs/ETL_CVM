@@ -79,18 +79,28 @@ class LoadDw:
     def insert_data(self):
         try:
             df_parquet = self.spark.read.parquet(f"s3a://s3-cvm-fii/{self.prefix}/*.parquet")
-            df_parquet.show()
-            print('testando conexao...')
+
+            logging.info('[FAZENDO A INSERÇÃO DOS DADOS...]')
             time.sleep(5)
 
-            df_parquet.write.jdbc(
-                url="jdbc:postgresql://postgres:5432/CVM",
-                table="cvm.fundos",
-                mode="overwrite",
-                properties={
-                    "user": self.user,
-                    "password": self.password,
-                    "driver": "org.postgresql.Driver"})
+            # df_parquet.write.jdbc(
+            #     url="jdbc:postgresql://postgres:5432/CVM",
+            #     table="cvm.fundos",
+            #     mode="overwrite",
+            #     properties={
+            #         "user": self.user,
+            #         "password": self.password,
+            #         "driver": "org.postgresql.Driver"})
+            
+            df_parquet.write \
+                .mode("append") \
+                .format("jdbc") \
+                .option("url", "jdbc:postgresql://postgres:5432/CVM") \
+                .option("dbtable", "cvm.fundos") \
+                .option("user", self.user) \
+                .option("password", self.password) \
+                .save()
+
             logging.info("\u2705 ################## [DADOS INSERIDOS COM SUCESSO] ##################")
         except Exception as e:
             logging.error(f"\u274c ################## [ERRO AO INSERIR DADOS NA TABELA] {e} ##################")

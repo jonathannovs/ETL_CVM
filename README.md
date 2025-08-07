@@ -26,3 +26,5 @@ $ docker logs jupyter_pyspark
 $ docker exec -it spark-master bash 
 rodar: $ python /app/main.py
 
+# rodando pipeline todo
+ docker exec -it spark-master spark-submit --jars /opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar --driver-class-path /opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar --master spark://spark-master:7077 /app/main.py
