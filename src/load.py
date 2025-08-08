@@ -32,12 +32,12 @@ class LoadDw:
         response = self.s3.list_objects_v2(Bucket=bucket_name, Prefix=f"{self.prefix}/")
 
         if "Contents" in response:
-            print("Arquivos encontrados no bucket:")
+            logging.info("Arquivos encontrados no bucket:")
             paths = [f"s3a://{bucket_name}/{obj['Key']}" for obj in response["Contents"]]
             for path in paths:
-                print(f"- {path}")
+                logging.info(f"- {path}")
         else:
-            print( 'bucket vazio')
+            logging.warning('[############### BUCKET VAZIO ################]')
 
     def delete_files(self, bucket_name, prefix):
         response = self.s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
@@ -82,15 +82,6 @@ class LoadDw:
 
             logging.info('[FAZENDO A INSERÇÃO DOS DADOS...]')
             time.sleep(5)
-
-            # df_parquet.write.jdbc(
-            #     url="jdbc:postgresql://postgres:5432/CVM",
-            #     table="cvm.fundos",
-            #     mode="overwrite",
-            #     properties={
-            #         "user": self.user,
-            #         "password": self.password,
-            #         "driver": "org.postgresql.Driver"})
             
             df_parquet.write \
                 .mode("append") \

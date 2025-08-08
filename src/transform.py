@@ -55,27 +55,33 @@ class Transform:
             return None
         df = (df
             .filter(f.col('TP_FUNDO_CLASSE')=='FI')
+            .filter(f.abs(f.col('VL_PATRIM_LIQ')) < 1e24)
+            .filter(f.abs(f.col('VL_QUOTA')) < 1e12)
+            .drop('VL_TOTAL')
             .withColumn('CNPJ_FUNDO_CLASSE',f.regexp_replace(f.col('CNPJ_FUNDO_CLASSE'), r'[./-]', ''))
             .withColumn('ano',f.year(f.col('DT_COMPTC')))
+            .withColumn('pl_fundo', f.round(f.col('VL_PATRIM_LIQ'), 4))
+            .withColumn('cota', f.round(f.col('VL_QUOTA'), 4))
+            .withColumn('valor_resgates', f.round(f.col('RESG_DIA'), 4))
+            .withColumn('valor_aplicacoes', f.round(f.col('CAPTC_DIA'), 4))
             .select(
                 f.col('CNPJ_FUNDO_CLASSE').alias('cnpj_fundo'),
                 f.col('NR_COTST').alias('qtd_cotistas'),
-                f.col('RESG_DIA').alias('valor_resgates'),
-                f.col('CAPTC_DIA').alias('valor_aplicacoes'),
-                f.col('VL_QUOTA').alias('cota'),
-                f.col('VL_TOTAL').alias('valor_carteira'),
-                f.col('VL_PATRIM_LIQ').alias('pl_fundo'),
+                f.col('valor_resgates'),
+                f.col('valor_aplicacoes'),
+                f.col('cota'),
+                f.col('pl_fundo'),
                 f.col('DT_COMPTC').alias('data_referencia'),
                 f.col('ano'),
                 f.current_date().alias('dt_ingest'))
         )
-
-        logging.info("\u2705 ################## [DATAFRAME ENVIADO PARA UPLOAD] ###################")
+        logging.info(f"\u2705 ################## [{df.count()} LINHAS] ###################")
+        logging.info("\u2705 ################## [DATAFRAME ENVIADO PARA UPLOAD NO S3] ###################")
         return df
 
     def transform_teste(self,df):
-        #df = df.limit(5)
-        df = df.filter(f.col("Ano") == 2025)
+        df = df.limit(100)
+        #df = df.filter(f.col("Ano") == 2025)
 
         logging.info("\u2705 ################### [DATAFRAME <TESTE> ENVIADO PARA UPLOAD] ##################")
         return df

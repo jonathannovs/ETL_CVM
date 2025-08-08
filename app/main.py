@@ -40,19 +40,19 @@ def main():
     trans = Transform(spark)
     df_raw = trans.read_s3_files(prefix='raw')
     df_transformed = trans.transform_data(df_raw)
-    teste = trans.transform_teste(df_transformed) 
-    trans.upload_stage(teste, prefix="stage/2025")
+    #teste = trans.transform_teste(df_transformed) 
+    trans.upload_stage(df_transformed, prefix="stage/full")
     
-    logging.info('[# 3 -------- CONSULTANDO S3 ----------#]')
+    logging.info('[# 3 -------- CARREGANDO DADOS NO DATA WAREHOUSE ----------#]')
     time.sleep(5)
 
-    load = LoadDw(spark, prefix = 'stage/2025', 
+    load = LoadDw(spark, prefix = 'stage/full', 
                 host="postgres",
                 database=DB_NAME,
                 user=DB_USER,
                 password=DB_PASSWORD)
     load.consulta_bucket()
-    #load.delete_files('s3-cvm-fii','teste')
+    #load.delete_files('s3-cvm-fii','stage/2025')
     load.create_table(filepath='/sql/create_tables.sql')
     load.insert_data()
 
