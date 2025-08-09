@@ -37,24 +37,24 @@ def main():
     logging.info('[# 2 -------- TRANSFORMANDO DADOS----------#]')
     time.sleep(5)
 
-    trans = Transform(spark)
-    df_raw = trans.read_s3_files(prefix='raw')
-    df_transformed = trans.transform_data(df_raw)
-    #teste = trans.transform_teste(df_transformed) 
-    trans.upload_stage(df_transformed, prefix="stage/full")
+    tr = Transform(spark)
+    df_raw = tr.read_s3_files(prefix='raw')                # busca os dados do bucket raw do s3 e le e concatena em csv
+    df_transformed = tr.transform_data(df_raw)             # recebe o df lido em csv e faz o tratamento
+    df_metricas = tr.calculate_metricas(df_transformed)    # recebe o df que foi tratado e faz calculos
+    teste = tr.transform_teste(df_metricas)                # <teste>
+    tr.upload_stage(teste, tipo_df='metricas')             # recebe o dataframe para salvar na pasta stage como parquet      
     
     logging.info('[# 3 -------- CARREGANDO DADOS NO DATA WAREHOUSE ----------#]')
     time.sleep(5)
 
-    load = LoadDw(spark, prefix = 'stage/full', 
+    load = LoadDw(spark,
                 host="postgres",
                 database=DB_NAME,
                 user=DB_USER,
                 password=DB_PASSWORD)
-    load.consulta_bucket()
-    #load.delete_files('s3-cvm-fii','stage/2025')
+
     load.create_table(filepath='/sql/create_tables.sql')
-    load.insert_data()
+    load.insert_data(schema='cvm_teste', tables=['metricas'])
 
     logging.info('[#################### PIPELINE FINALIZADO #################]')
     time.sleep(2)
