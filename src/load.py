@@ -1,8 +1,8 @@
-import boto3
+
 import logging
 import psycopg2
 import time 
-
+import os
 from pyspark.sql import functions as f
 from pyspark.sql.window import Window as W
 from pyspark.sql import SparkSession
@@ -44,7 +44,7 @@ class LoadDw:
             conn.close()
 
     def insert_data(self, schema:str, tables:list = None):
-
+            
         paths = {
         "metricas": "/stage/metricas/",
         "fundos": "/stage/fundos/"
@@ -73,9 +73,24 @@ class LoadDw:
                     .option("user", self.user) \
                     .option("password", self.password) \
                     .save()
-                logging.info(f"\u2705 ################## [DADOS de {table} INSERIDOS COM SUCESSO] ##################")
+                logging.info(f"\u2705 ################## [DADOS de {table} INSERIDOS COM SUCESSO NO BANCO DE DADOS] ##################")
             except Exception as e:
                 logging.error(f"\u274c ################## [ERRO AO INSERIR DADOS NA TABELA] {e} ##################")
 
+    def clean_temp_folder(self):
+        temp_folder = ["/stage/metricas/","/stage/fundos/"]
+        for f in temp_folder:
+            try:
+                files = os.listdir(f)
+                for file in files:
+                    path_file = os.path.join(f, file)
+                    
+                    if os.path.isfile(path_file):
+                        os.remove(path_file)  
+                        #logging.info(f"ARQUIVO: {path_file} APAGADO")
+            except FileNotFoundError:
+                logging.info(f"Pasta {f} não encontrada.")
+
+        logging.info(f"\u2705 ################## [ARQUIVOS TEMPORARIOS APAGADOS] ##################")
 
 

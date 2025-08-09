@@ -11,6 +11,7 @@ from transform import Transform
 from extract import ExtractCvm
 from load import LoadDw
 
+
 DB_NAME = 'CVM'
 DB_USER = 'JONANOV'
 DB_PASSWORD = 'admin'
@@ -26,6 +27,7 @@ def main():
         .config("spark.executor.extraClassPath", "/opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar") \
         .getOrCreate()
 
+    lista_tabelas = ['metricas','fundos']
 
     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
     time.sleep(5)
@@ -38,14 +40,24 @@ def main():
     time.sleep(5)
 
     tr = Transform(spark)
-    df_raw = tr.read_s3_files(prefix='raw')                # busca os dados do bucket raw do s3 e le e concatena em csv
-    df_transformed = tr.transform_data(df_raw)             # recebe o df lido em csv e faz o tratamento
-    df_metricas = tr.calculate_metricas(df_transformed)    # recebe o df que foi tratado e faz calculos
-    teste = tr.transform_teste(df_metricas)                # <teste>
-    tr.upload_stage(teste, tipo_df='metricas')             # recebe o dataframe para salvar na pasta stage como parquet      
+     
+    # busca os dados do bucket raw do s3 e le e concatena em csv
+    df_raw = tr.read_s3_files(prefix='raw')      
     
+    # recebe o df lido em csv e faz o tratamento        
+    df_transformed = tr.transform_data(df_raw) 
+    
+    # recebe o df que foi tratado e faz calculos            
+    df_metricas = tr.calculate_metricas(df_transformed)   
+
+    # Salva fundos
+    tr.upload_stage({lista_tabelas[0]: df_transformed,
+                    lista_tabelas[1]: df_metricas})
+
     logging.info('[# 3 -------- CARREGANDO DADOS NO DATA WAREHOUSE ----------#]')
     time.sleep(5)
+
+    lista_tabelas = ['metricas','fundos']
 
     load = LoadDw(spark,
                 host="postgres",
@@ -54,7 +66,9 @@ def main():
                 password=DB_PASSWORD)
 
     load.create_table(filepath='/sql/create_tables.sql')
-    load.insert_data(schema='cvm_teste', tables=['metricas'])
+    load.insert_data(schema='cvm_teste', tables=lista_tabelas)
+
+    load.clean_temp_folder()
 
     logging.info('[#################### PIPELINE FINALIZADO #################]')
     time.sleep(2)
