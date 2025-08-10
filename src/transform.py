@@ -108,39 +108,6 @@ class Transform:
         logging.info("\u2705 ################## [DATAFRAME METRICAS ENVIADO PARA STAGE] ###################")
         return df
 
-    # def upload_stage(self,df, stage_tables:list = None):
-
-    #     if df is None:
-    #         logging.warning("\u274c DataFrame de entrada está vazio. Nada será escrito.")
-    #         return None
-
-    #     paths = {
-    #     "metricas": "/stage/metricas/",
-    #     "fundos": "/stage/fundos/"
-
-    #     }
-
-    #     if stage_tables == None:
-    #         for s in list(paths.keys()):
-    #             path_stage = paths[s]
-    #             os.makedirs(path_stage, exist_ok=True)
-    #             try:
-    #                 df.write.mode("overwrite").parquet(path_stage)
-    #                 logging.info(f" \u2705 #################### [DADOS SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
-    #             except Exception as e:
-    #                 logging.error(f"\u274c [ERRO AO SALVAR PARQUET NO STAGE {path_stage}]: {e}")
-
-    #     else:
-    #         for s in stage_tables:
-    #             path_stage = paths[s]
-    #             os.makedirs(path_stage, exist_ok=True)
-    #             try:
-    #                 df.write.mode("overwrite").parquet(path_stage)
-    #                 logging.info(f" \u2705 #################### [DADOS SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
-    #             except Exception as e:
-    #                 logging.error(f"\u274c [ERRO AO SALVAR PARQUET NO STAGE {path_stage}]: {e}")
-
-##########################################
     def upload_stage(self,dfs:dict):
 
         if not dfs:

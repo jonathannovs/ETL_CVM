@@ -27,7 +27,7 @@ def main():
         .config("spark.executor.extraClassPath", "/opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar") \
         .getOrCreate()
 
-    lista_tabelas = ['metricas','fundos']
+    lista_tabelas = ['fundos','metricas']
 
     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
     time.sleep(5)
@@ -50,14 +50,11 @@ def main():
     # recebe o df que foi tratado e faz calculos            
     df_metricas = tr.calculate_metricas(df_transformed)   
 
-    # Salva fundos
     tr.upload_stage({lista_tabelas[0]: df_transformed,
                     lista_tabelas[1]: df_metricas})
 
     logging.info('[# 3 -------- CARREGANDO DADOS NO DATA WAREHOUSE ----------#]')
     time.sleep(5)
-
-    lista_tabelas = ['metricas','fundos']
 
     load = LoadDw(spark,
                 host="postgres",
