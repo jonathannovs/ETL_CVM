@@ -79,4 +79,17 @@ class ExtractCvm:
             except Exception as err:
                 logging.exception(f"Erro inesperado em {month:02d}/{year}: {err}")
 
-
+        def extract_infos_fund(self,prefix):
+            dfs = []
+            for i in range(2,6):
+                url = f'https://dados.cvm.gov.br/dados/FI/DOC/EXTRATO/DADOS/extrato_fi_202{i}.csv' 
+                response = requests.get(url)
+                response.raise_for_status()
+                df = pd.read_csv(io.StringIO(response.content.decode('latin-1')), sep=";")
+                df = df[['CNPJ_FUNDO_CLASSE','DENOM_SOCIAL','DT_COMPTC']]
+                dfs.append(df)
+            
+            df_uni = pd.concat(dfs,ignore_index=True)
+            df_uni = df_uni.drop_duplicates(subset='CNPJ_FUNDO_CLASSE').reset_index(drop=True)
+            print(df_uni.shape[0])
+            df_uni.to_csv('infos_fii.csv',index=False)
