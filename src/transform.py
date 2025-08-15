@@ -57,7 +57,7 @@ class Transform:
             return None
         
         df = (df
-            .withColumn('CNPJ_FUNDO_CLASSE',f.regexp_replace(f.col('CNPJ_FUNDO_CLASSE'), r'[./-]', ''))
+            .withColumn('CNPJ_FUNDO_CLASSE',f.trim(f.regexp_replace(f.col('CNPJ_FUNDO_CLASSE'), r'[./-]', '')))
             .withColumn('DT_COMPTC',f.col('DT_COMPTC').cast(DateType()))
             .withColumn('VL_QUOTA',f.round(f.col('VL_QUOTA').cast(DoubleType()),2))
             .withColumn('VL_PATRIM_LIQ',f.round(f.col('VL_PATRIM_LIQ').cast(DoubleType()),2))
@@ -81,7 +81,45 @@ class Transform:
             )
         ).drop_duplicates(['id_fund_date'])
 
-        df = df.limit(100)  # TESTE
+        # TESTE
+        df = df.limit(100)  
+        logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA JUNCÃO] ###################")
+        return df
+    
+
+    def join_named_fund(self, df):
+        df_infos = self.spark.read \
+            .option("header", "true") \
+            .option("encoding", "latin1") \
+            .option("sep", ";") \
+            .option("inferSchema", "false")\
+            .csv("s3a://s3-cvm-fii/raw_infos/*.csv")\
+            
+        df_infos = (df_infos
+                    .withColumn('CNPJ_FUNDO_CLASSE',f.trim(f.regexp_replace(f.col('CNPJ_FUNDO_CLASSE'), r'[./-]', '')))
+                    .select(
+                           f.col('CNPJ_FUNDO_CLASSE').alias('cnpj_fundo'),
+                           f.col('DENOM_SOCIAL').alias('nome_fundo')
+                    ).drop_duplicates(['cnpj_fundo'])
+            )    
+    
+        df = df.join(df_infos, on=['cnpj_fundo'], how='left')
+
+        df = df.select('id_fund_date',
+                       'cnpj_fundo',
+                       'nome_fundo',
+                       'valor_resgates',
+                       'valor_aplicacoes',
+                       'cota',
+                       'pl_fundo',
+                       'data_referencia',
+                       'qtd_cotistas',
+                       'ano',
+                       'dt_ingest'
+                    )
+
+        # TESTE
+        df = df.limit(100)  
         logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA STAGE] ###################")
         return df
 
@@ -134,7 +172,7 @@ class Transform:
             os.makedirs(path_stage, exist_ok=True)
             try:
                 df.write.mode("overwrite").parquet(path_stage)
-                logging.info(f" \u2705 #################### [DADOS DA TABELA {table_name} DO SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
+                logging.info(f" \u2705 #################### [DADOS DA TABELA {table_name}  SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
             except Exception as e:
                 logging.error(f"\u274c [ERRO AO SALVAR TABELA {table_name}  PARQUET NO STAGE {path_stage}]: {e}")
 

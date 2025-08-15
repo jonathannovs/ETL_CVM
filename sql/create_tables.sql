@@ -3,6 +3,7 @@ CREATE SCHEMA IF NOT EXISTS cvm_teste;
 CREATE TABLE IF NOT EXISTS cvm_teste.fundos (
     id_fund_date VARCHAR(30) PRIMARY KEY,
     cnpj_fundo VARCHAR(16),
+    nome_fundo VARCHAR(256),
     qtd_cotistas INT,
     valor_resgates NUMERIC(18, 6),
     valor_aplicacoes NUMERIC(18, 6),
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS cvm_teste.fundos (
 CREATE TABLE IF NOT EXISTS cvm_teste.metricas (
     id_fund_date VARCHAR(30) PRIMARY KEY,
     cnpj_fundo VARCHAR(16),
+    nome_fundo VARCHAR(256),
     valor_resgates NUMERIC(18, 6),
     valor_aplicacoes NUMERIC(18, 6),
     cota NUMERIC(18, 6),

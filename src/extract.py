@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import zipfile
 import os
-from io import BytesIO
+from io import BytesIO, StringIO
 import logging
 from datetime import datetime
 from tqdm import tqdm
@@ -70,7 +70,7 @@ class ExtractCvm:
                     with zf.open(file_name) as file:
                         self.s3.upload_fileobj(file, self.bucket_name, s3_key)
 
-                    logging.info(f"Arquivo '{file_name}' enviado para o S3 no caminho '{s3_key}'.")
+                    logging.info(f"Arquivo '{file_name}' ({len(response.content):,} bytes) enviado para o S3 no caminho '{s3_key}'.")
 
 
             except requests.exceptions.HTTPError as err:
@@ -79,17 +79,27 @@ class ExtractCvm:
             except Exception as err:
                 logging.exception(f"Erro inesperado em {month:02d}/{year}: {err}")
 
-        def extract_infos_fund(self,prefix):
-            dfs = []
-            for i in range(2,6):
-                url = f'https://dados.cvm.gov.br/dados/FI/DOC/EXTRATO/DADOS/extrato_fi_202{i}.csv' 
-                response = requests.get(url)
-                response.raise_for_status()
-                df = pd.read_csv(io.StringIO(response.content.decode('latin-1')), sep=";")
-                df = df[['CNPJ_FUNDO_CLASSE','DENOM_SOCIAL','DT_COMPTC']]
-                dfs.append(df)
-            
-            df_uni = pd.concat(dfs,ignore_index=True)
-            df_uni = df_uni.drop_duplicates(subset='CNPJ_FUNDO_CLASSE').reset_index(drop=True)
-            print(df_uni.shape[0])
-            df_uni.to_csv('infos_fii.csv',index=False)
+
+    def extract_infos_funds(self, prefix):
+
+        for ano in range(self.start_date, datetime.today().year + 1):
+
+
+            file_name = f"infos_fundos{ano}.csv"
+            s3_key = f"{prefix}/{file_name}"
+
+            try:
+                self.s3.head_object(Bucket=self.bucket_name, Key=s3_key)
+                logging.info(f"O arquivo '{s3_key}' já existe no bucket. Pulando download.")
+                continue 
+            except ClientError as e:
+                if e.response['Error']['Code'] != "404":
+                    logging.exception(f"Erro ao verificar existência do arquivo '{s3_key}': {e}")
+                    continue  
+            url = f'https://dados.cvm.gov.br/dados/FI/DOC/EXTRATO/DADOS/extrato_fi_{ano}.csv'
+            response = requests.get(url)
+            response.raise_for_status()
+            file = BytesIO(response.content)
+
+            self.s3.upload_fileobj(file, self.bucket_name, s3_key)
+            logging.info(f"Arquivo '{file_name}' ({len(response.content):,} bytes)  enviado para o S3 no caminho '{s3_key}'.")

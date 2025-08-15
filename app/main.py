@@ -35,6 +35,7 @@ def main():
     ext = ExtractCvm(start_date=2022, bucket_name="s3-cvm-fii")
     ext.create_bucket()
     ext.extract_info_diary(prefix='raw')
+    ext.extract_infos_funds(prefix='raw_infos')
 
     logging.info('[# 2 -------- TRANSFORMANDO DADOS----------#]')
     time.sleep(5)
@@ -46,11 +47,14 @@ def main():
     
     # recebe o df lido em csv e faz o tratamento        
     df_transformed = tr.transform_data(df_raw) 
+
+    # recebe o df tratado e faz a junção com df com nome dos fundos
+    df_join = tr.join_named_fund(df_transformed) 
     
     # recebe o df que foi tratado e faz calculos            
-    df_metricas = tr.calculate_metricas(df_transformed)   
+    df_metricas = tr.calculate_metricas(df_join)   
 
-    tr.upload_stage({lista_tabelas[0]: df_transformed,
+    tr.upload_stage({lista_tabelas[0]: df_join,
                     lista_tabelas[1]: df_metricas})
 
     logging.info('[# 3 -------- CARREGANDO DADOS NO DATA WAREHOUSE ----------#]')
