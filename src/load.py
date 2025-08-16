@@ -44,7 +44,6 @@ class LoadDw:
             conn.close()
 
     def insert_data(self, schema:str, tables:list = None):
-            
         paths = {
         "metricas": "/stage/metricas/",
         "fundos": "/stage/fundos/"
@@ -87,7 +86,7 @@ class LoadDw:
                     
                     if os.path.isfile(path_file):
                         os.remove(path_file)  
-                        #logging.info(f"ARQUIVO: {path_file} APAGADO")
+                        
             except FileNotFoundError:
                 logging.info(f"Pasta {f} não encontrada.")
 

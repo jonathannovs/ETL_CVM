@@ -12,7 +12,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class Transform:
 
     def __init__(self, spark: SparkSession):
-
         self.spark = spark
 
         hadoop_conf = self.spark._jsc.hadoopConfiguration()
@@ -24,7 +23,6 @@ class Transform:
         hadoop_conf.set("fs.s3a.committer.name", "directory")
         
     def read_s3_files(self,prefix:str):
-
         select_cols = ["TP_FUNDO_CLASSE", "CNPJ_FUNDO_CLASSE", "DT_COMPTC", "VL_QUOTA","VL_PATRIM_LIQ",'CAPTC_DIA','RESG_DIA','NR_COTST']
         map_columns = {
                         "TP_FUNDO":'TP_FUNDO_CLASSE',
@@ -45,7 +43,7 @@ class Transform:
                 .csv(f"s3a://s3-cvm-fii/{prefix}/*.csv")\
                 .select(*select_cols)
             df = padronizar_colunas(df, map_columns)
-            logging.info(' ############### \u2705 [ARQUIVOS LIDOS] #################')
+            logging.info('\u2705 ############### [ARQUIVOS LIDOS] #################')
 
         except Exception as e:
             print(f'\u274c{e}')
@@ -101,7 +99,7 @@ class Transform:
                            f.col('CNPJ_FUNDO_CLASSE').alias('cnpj_fundo'),
                            f.col('DENOM_SOCIAL').alias('nome_fundo')
                     ).drop_duplicates(['cnpj_fundo'])
-            )    
+                )    
     
         df = df.join(df_infos, on=['cnpj_fundo'], how='left')
 
@@ -147,19 +145,15 @@ class Transform:
         return df
 
     def upload_stage(self,dfs:dict):
-
         if not dfs:
             logging.warning("\u274c Nenhum DataFrame foi passado para upload_stage. Nada será escrito.")
             return None
 
         paths = {
         "metricas": "/stage/metricas/",
-        "fundos": "/stage/fundos/"
-
-        }
+        "fundos": "/stage/fundos/"}
 
         for table_name, df in dfs.items():
-
             if df is None:
                 logging.warning(f"\u274c DataFrame para '{table_name}' está vazio. Pulando...")
                 continue
@@ -172,7 +166,7 @@ class Transform:
             os.makedirs(path_stage, exist_ok=True)
             try:
                 df.write.mode("overwrite").parquet(path_stage)
-                logging.info(f" \u2705 #################### [DADOS DA TABELA {table_name}  SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
+                logging.info(f"\u2705 #################### [DADOS DA TABELA {table_name}  SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
             except Exception as e:
                 logging.error(f"\u274c [ERRO AO SALVAR TABELA {table_name}  PARQUET NO STAGE {path_stage}]: {e}")
 

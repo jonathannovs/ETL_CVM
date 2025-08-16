@@ -12,7 +12,6 @@ from botocore.exceptions import ClientError
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ExtractCvm:
-
     def __init__(self,bucket_name:str, start_date= '2022-01-01', end_date = None):
         self.start_date = datetime.strptime(start_date, "%Y-%m-%d")
         self.start_year = self.start_date.year 
@@ -46,7 +45,7 @@ class ExtractCvm:
             for month in range(start_month, end_month +1):
                 periodos.append((year, month))
 
-        for year, month in tqdm(periodos, desc="Baixando relatórios", unit=" file"):
+        for year, month in tqdm(periodos, desc="Baixando relatórios", unit="file"):
             yyyymm = f"{year}{month:02d}"
             file_name = f"inf_diario_fi_{yyyymm}.csv"
             prefix=prefix

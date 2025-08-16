@@ -1,12 +1,18 @@
 import sys
 import logging 
 import time
+import os
 from pyspark.sql import SparkSession 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+os.makedirs("/app/logs", exist_ok=True)
+
+logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("/app/logs/etl.log", mode="a"),
+        logging.StreamHandler()])
+
 sys.path.append("/src")  
-
-
 from transform import Transform
 from extract import ExtractCvm
 from load import LoadDw
@@ -32,7 +38,7 @@ def main():
     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
     time.sleep(5)
 
-    ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2025-01-01',end_date='2025-08-01')
+    ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2024-01-01',end_date='2025-08-01')
     ext.create_bucket()
     ext.extract_info_diary(prefix='raw')
     ext.extract_infos_funds(prefix='raw_infos')
@@ -71,7 +77,7 @@ def main():
 
     load.clean_temp_folder()
 
-    logging.info('[#################### PIPELINE FINALIZADO #################]')
+    logging.info('\u2705[#################### PIPELINE FINALIZADO #################]')
     time.sleep(2)
 
     spark.stop()
