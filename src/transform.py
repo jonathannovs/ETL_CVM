@@ -128,7 +128,7 @@ class Transform:
             print("DataFrame de entrada está vazio.")
             return None
         
-        df = df.select('id_fund_date','cnpj_fundo','valor_resgates','valor_aplicacoes','cota','pl_fundo','data_referencia','ano')
+        df = df.select('id_fund_date','cnpj_fundo','nome_fundo','valor_resgates','valor_aplicacoes','cota','pl_fundo','data_referencia','ano')
 
         janela_fundo = w.partitionBy(f.col('cnpj_fundo')).orderBy('data_referencia')
 

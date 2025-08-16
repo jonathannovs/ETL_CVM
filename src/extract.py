@@ -13,9 +13,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 class ExtractCvm:
 
-    def __init__(self,start_date:int, bucket_name:str, end_date=None):
-        self.start_date = start_date
-        self.end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if isinstance(end_date, str) else end_date or datetime.now().date()
+    def __init__(self,bucket_name:str, start_date= '2022-01-01', end_date = None):
+        self.start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        self.start_year = self.start_date.year 
+        self.start_month = self.start_date.month
+        self.end_date = datetime.today().date() if end_date is None else datetime.strptime(end_date, "%Y-%m-%d")
         self.end_year = self.end_date.year
         self.end_month = self.end_date.month
         self.bucket_name = bucket_name
@@ -24,9 +26,8 @@ class ExtractCvm:
             endpoint_url="http://localstack:4566",  
             aws_access_key_id="test",            
             aws_secret_access_key="test",
-            region_name="us-east-1"
-        )
-
+            region_name="us-east-1")
+        
     def create_bucket(self):
         try:
             self.s3.create_bucket(Bucket=self.bucket_name)
@@ -38,12 +39,11 @@ class ExtractCvm:
                 logging.exception(f"Erro ao criar o bucket: {e}")
 
     def extract_info_diary(self,prefix):
-   
         periodos = []
-        for year in range(self.start_date, self.end_year + 1):
-            for month in range(1, 13):
-                if year == self.end_year and month > self.end_month:
-                    break
+        for year in range(self.start_year, self.end_year + 1):
+            start_month = self.start_month if year == self.start_year else 1
+            end_month = self.end_month if year == self.end_year else 12
+            for month in range(start_month, end_month +1):
                 periodos.append((year, month))
 
         for year, month in tqdm(periodos, desc="Baixando relatórios", unit=" file"):
@@ -72,7 +72,6 @@ class ExtractCvm:
 
                     logging.info(f"Arquivo '{file_name}' ({len(response.content):,} bytes) enviado para o S3 no caminho '{s3_key}'.")
 
-
             except requests.exceptions.HTTPError as err:
                 logging.exception(f"Erro HTTP: O arquivo para {month:02d}/{year} não foi encontrado ou o servidor retornou um erro.")
 
@@ -81,9 +80,7 @@ class ExtractCvm:
 
 
     def extract_infos_funds(self, prefix):
-
-        for ano in range(self.start_date, datetime.today().year + 1):
-
+        for ano in range(self.start_year, self.end_year +1):
 
             file_name = f"infos_fundos{ano}.csv"
             s3_key = f"{prefix}/{file_name}"

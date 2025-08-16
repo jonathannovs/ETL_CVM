@@ -32,7 +32,7 @@ def main():
     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
     time.sleep(5)
 
-    ext = ExtractCvm(start_date=2022, bucket_name="s3-cvm-fii")
+    ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2025-01-01',end_date='2025-08-01')
     ext.create_bucket()
     ext.extract_info_diary(prefix='raw')
     ext.extract_infos_funds(prefix='raw_infos')
