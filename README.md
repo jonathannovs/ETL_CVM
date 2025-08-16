@@ -30,3 +30,7 @@ rodar: $ python /app/main.py
  docker exec -it spark-master spark-submit --jars /opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar --driver-class-path /opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar --master spark://spark-master:7077 /app/main.py
 
 # consultar memoria: free -h
+
+
+docker exec -it spark-master spark-submit --jars /opt/bitnami/spark/jars-custom/postgresql-42.6.0.jar /app/main.py
+

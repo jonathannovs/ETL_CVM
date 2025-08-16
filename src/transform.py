@@ -3,7 +3,6 @@ from pyspark.sql import functions as f
 from pyspark.sql.window import Window as w
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, DateType
-import sys
 import os
 import logging 
 
@@ -43,7 +42,7 @@ class Transform:
                 .csv(f"s3a://s3-cvm-fii/{prefix}/*.csv")\
                 .select(*select_cols)
             df = padronizar_colunas(df, map_columns)
-            logging.info('\u2705 ############### [ARQUIVOS LIDOS] #################')
+            logging.info('\u2705 ################# [ARQUIVOS LIDOS] #################')
 
         except Exception as e:
             print(f'\u274c{e}')
@@ -79,12 +78,10 @@ class Transform:
             )
         ).drop_duplicates(['id_fund_date'])
 
-        # TESTE
-        df = df.limit(100)  
+        # df = df.limit(100)  # TESTE
         logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA JUNCÃO] ###################")
         return df
     
-
     def join_named_fund(self, df):
         df_infos = self.spark.read \
             .option("header", "true") \
@@ -116,8 +113,7 @@ class Transform:
                        'dt_ingest'
                     )
 
-        # TESTE
-        df = df.limit(100)  
+        # df = df.limit(100)   # TESTE
         logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA STAGE] ###################")
         return df
 
@@ -140,7 +136,7 @@ class Transform:
             .drop('cota_anterior','pl_anterior')
             )
         
-        df = df.limit(100)   #TESTE
+        # df = df.limit(100)   #TESTE
         logging.info("\u2705 ################## [DATAFRAME METRICAS ENVIADO PARA STAGE] ###################")
         return df
 
@@ -166,7 +162,7 @@ class Transform:
             os.makedirs(path_stage, exist_ok=True)
             try:
                 df.write.mode("overwrite").parquet(path_stage)
-                logging.info(f"\u2705 #################### [DADOS DA TABELA {table_name}  SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
+                logging.info(f"\u2705 ################## [DADOS DA TABELA {table_name}  SALVOS COM SUCESSO NO STAGE {path_stage}] ################## ")
             except Exception as e:
                 logging.error(f"\u274c [ERRO AO SALVAR TABELA {table_name}  PARQUET NO STAGE {path_stage}]: {e}")
 

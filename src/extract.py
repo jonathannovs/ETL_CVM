@@ -1,8 +1,7 @@
 import requests
 import pandas as pd
 import zipfile
-import os
-from io import BytesIO, StringIO
+from io import BytesIO
 import logging
 from datetime import datetime
 from tqdm import tqdm
