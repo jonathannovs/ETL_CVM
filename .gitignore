@@ -13,6 +13,9 @@ __pycache__/
 # Configurações do VS Code
 .vscode/
 
+#pasta inteira de cache
+volume/cache/*
+
 # Arquivos de dados comuns
 *.csv
 *.tsv
