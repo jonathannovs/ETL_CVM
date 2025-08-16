@@ -68,7 +68,7 @@ class ExtractCvm:
                     with zf.open(file_name) as file:
                         self.s3.upload_fileobj(file, self.bucket_name, s3_key)
 
-                    logging.info(f"Arquivo '{file_name}' ({len(response.content):,} bytes) enviado para o S3 no caminho '{s3_key}'.")
+                    logging.info(f"Arquivo '{file_name}' ({len(response.content):,} bytes) enviado para o S3 no caminho '{s3_key}'")
 
             except requests.exceptions.HTTPError as err:
                 logging.exception(f"Erro HTTP: O arquivo para {month:02d}/{year} não foi encontrado ou o servidor retornou um erro.")

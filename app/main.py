@@ -35,7 +35,7 @@ def main():
     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
     time.sleep(5)
 
-    ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2024-01-01')
+    ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2022-01-01',end_date='2023-12-01')
     ext.create_bucket()
     ext.extract_info_diary(prefix='raw')
     ext.extract_infos_funds(prefix='raw_infos')
@@ -57,6 +57,7 @@ def main():
     # recebe o df que foi tratado e faz calculos            
     df_metricas = tr.calculate_metricas(df_join)   
 
+    # dicionario com tabela para inserir como chave e função como valor
     tr.upload_stage({lista_tabelas[0]: df_join,
                     lista_tabelas[1]: df_metricas})
 
