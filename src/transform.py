@@ -88,7 +88,7 @@ class Transform:
             )
         ).drop_duplicates(['id_fund_date'])
 
-        df = df.limit(100)  # TESTE
+        # df = df.limit(100)  # TESTE
         logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA JUNCÃO] ###################")
         return df
     
@@ -123,7 +123,7 @@ class Transform:
                        'dt_ingest'
                     )
 
-        df = df.limit(100)   # TESTE
+        # df = df.limit(100)   # TESTE
         logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA STAGE] ###################")
         return df
 
