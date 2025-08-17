@@ -48,11 +48,11 @@ Propósito: Disponibilizar os dados estruturados para consumo por ferramentas de
 
 ```bash
 ETL_CVM/
-├── app/                 # Scripts principais do projeto
+├── app/                 # Script principal do projeto
 ├── jars/                # Bibliotecas e drivers Java para Spark
 ├── notebooks/           # Notebooks para análise e testes
 ├── sql/                 # Scripts SQL para banco de dados
-├── src/                 # Código fonte do ETL
+├── src/                 # Classes do ETL
 ├── docker-compose.yml   # Orquestração Docker
 ├── Arquitetura ETL.png  # Diagrama da arquitetura ETL
 ├── README.md            # Documentação do projeto
