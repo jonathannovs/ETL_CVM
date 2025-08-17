@@ -20,9 +20,11 @@ class Transform:
         hadoop_conf.set("fs.s3a.path.style.access", "true")
         hadoop_conf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
         hadoop_conf.set("fs.s3a.committer.name", "directory")
-        
+
     def read_s3_files(self,prefix:str):
-        select_cols = ["TP_FUNDO_CLASSE", "CNPJ_FUNDO_CLASSE", "DT_COMPTC", "VL_QUOTA","VL_PATRIM_LIQ",'CAPTC_DIA','RESG_DIA','NR_COTST']
+        select_cols = ["TP_FUNDO_CLASSE", "CNPJ_FUNDO_CLASSE", "DT_COMPTC",
+                        "VL_QUOTA","VL_PATRIM_LIQ",'CAPTC_DIA','RESG_DIA','NR_COTST']
+
         map_columns = {
                         "TP_FUNDO":'TP_FUNDO_CLASSE',
                         "CNPJ_FUNDO":"CNPJ_FUNDO_CLASSE"}
@@ -40,12 +42,20 @@ class Transform:
                 .option("sep", ";") \
                 .option("inferSchema", "false")\
                 .csv(f"s3a://s3-cvm-fii/{prefix}/*.csv")\
-                .select(*select_cols)
+
             df = padronizar_colunas(df, map_columns)
+
+            for col in select_cols:
+                if col not in df.columns:
+                    df = df.withColumn(col, f.lit(None))
+
+            df = df.select(*select_cols)
+
             logging.info('\u2705 ################# [ARQUIVOS LIDOS] #################')
 
         except Exception as e:
             print(f'\u274c{e}')
+            df = None 
         return df
 
     def transform_data(self,df):
@@ -78,7 +88,7 @@ class Transform:
             )
         ).drop_duplicates(['id_fund_date'])
 
-        # df = df.limit(100)  # TESTE
+        df = df.limit(100)  # TESTE
         logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA JUNCÃO] ###################")
         return df
     
@@ -113,7 +123,7 @@ class Transform:
                        'dt_ingest'
                     )
 
-        # df = df.limit(100)   # TESTE
+        df = df.limit(100)   # TESTE
         logging.info("\u2705 ################## [DATAFRAME FUNDOS ENVIADO PARA STAGE] ###################")
         return df
 

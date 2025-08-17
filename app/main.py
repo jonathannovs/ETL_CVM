@@ -37,7 +37,7 @@ def main():
 
     #instanciando a classe e passando o período que se quer extrair os dados, 
     #caso não se passe as datas, irá pegar do dia 01/01/2022 até o dia atual.
-    ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2022-01-01',end_date='2023-12-01')
+    ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2022-01-01',end_date='2025-08-01')
 
     #criando Bucket s3 no Localstack
     ext.create_bucket()
