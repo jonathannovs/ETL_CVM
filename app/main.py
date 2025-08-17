@@ -71,7 +71,7 @@ def main():
                 password=DB_PASSWORD)
 
     load.create_table(filepath='/sql/create_tables.sql')
-    load.insert_data(schema='cvm_teste', tables=lista_tabelas)
+    load.insert_data(schema='cvm', tables=lista_tabelas)
 
     load.clean_temp_folder()
 

@@ -1,6 +1,6 @@
-CREATE SCHEMA IF NOT EXISTS cvm_teste;
+CREATE SCHEMA IF NOT EXISTS cvm;
 
-CREATE TABLE IF NOT EXISTS cvm_teste.fundos (
+CREATE TABLE IF NOT EXISTS cvm.fundos (
     id_fund_date VARCHAR(30) PRIMARY KEY,
     cnpj_fundo VARCHAR(16),
     nome_fundo VARCHAR(256),
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS cvm_teste.fundos (
     dt_ingest DATE
 );
     
-CREATE TABLE IF NOT EXISTS cvm_teste.metricas (
+CREATE TABLE IF NOT EXISTS cvm.metricas (
     id_fund_date VARCHAR(30) PRIMARY KEY,
     cnpj_fundo VARCHAR(16),
     nome_fundo VARCHAR(256),
