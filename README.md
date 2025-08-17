@@ -1,11 +1,11 @@
 
 
-# Projeto de Engenharia de Dados: ETL de Fundos de Investimento da CVM com Spark com AWS.
+# Projeto de Engenharia de Dados: ETL de Fundos de Investimento da CVM com Spark e AWS simulado.
 
-Um pipeline de dados completo para extrair, transformar e carregar (ETL) os informes diários de fundos de investimento brasileiros, disponibilizados publicamente pela CVM.
+Este projeto é um pipeline de dados completo para extrair, transformar e carregar (ETL) os informes diários de fundos de investimento brasileiros, disponibilizados publicamente pela CVM.
 
 ## 📜 Sobre o Projeto
-Este projeto nasceu da união de duas áreas de grande interesse: o mercado financeiro e a engenharia de dados. O objetivo principal foi construir um pipeline de dados robusto e escalável para processar um grande volume de informações diárias dos fundos de investimento brasileiros ao longo do período de 2022 até os dias atuais, disponibilizadas pela Comissão de Valores Mobiliários (CVM).
+O projeto nasceu da união de duas áreas de grande interesse: o mercado financeiro e a engenharia de dados. O objetivo principal foi construir um pipeline de dados robusto e escalável para processar um grande volume de informações diárias dos fundos de investimento brasileiros ao longo do período de 2022 até os dias atuais, disponibilizadas pela Comissão de Valores Mobiliários (CVM).
 
 O pipeline automatiza todo o processo, desde o download dos dados brutos até a disponibilização em um banco de dados relacional, pronto para análises e visualizações.
 
@@ -39,15 +39,16 @@ Propósito: Disponibilizar os dados estruturados para consumo por ferramentas de
 
 ## 🛠️ Tecnologias Utilizadas
 
-Python:	Linguagem principal para scripts de extração e transformação.
-Apache Spark:	Framework de processamento de dados distribuído para a etapa de transformação.
-PostgreSQL:	Banco de dados relacional para armazenar os dados tratados.
-Amazon S3 (LocalStack)	Armazenamento dos dados brutos (Data Lake).
-Docker & Docker Compose	Conteinerização e orquestração de toda a infraestrutura do projeto.
+-  Python:	Linguagem principal para scripts de extração e transformação.
+-  Apache Spark:	Framework de processamento de dados distribuído para a etapa de transformação.
+-  PostgreSQL:	Banco de dados relacional para armazenar os dados tratados.
+-  Amazon S3 (LocalStack):	Armazenamento dos dados brutos (Data Lake).
+-  Docker & Docker Compose:	Conteinerização e orquestração de toda a infraestrutura do projeto.
 
 
 ## 💻 Estrutura de Pastas
 
+```bash
 ETL_CVM/
 ├── app/                 # Scripts principais do projeto
 ├── jars/                # Bibliotecas e drivers Java para Spark
@@ -58,7 +59,7 @@ ETL_CVM/
 ├── Arquitetura ETL.png  # Diagrama da arquitetura ETL
 ├── README.md            # Documentação do projeto
 └── .gitignore           # Arquivos ignorados pelo Git
-
+```
 
 ## 🚀 Como Executar o Projeto
 Siga os passos abaixo para executar todo o pipeline de ETL localmente.
@@ -68,7 +69,6 @@ Antes de começar, garanta que você tenha as seguintes ferramentas instaladas:
 
 Git
 Docker
-
 
 Passo a Passo
 1. Clone o Repositório
@@ -110,8 +110,9 @@ O pipeline começará a extrair, transformar e carregar os dados. O processo pod
 Após a execução do pipeline, você pode se conectar ao banco de dados para verificar se os dados foram carregados corretamente.
 
 
-SQL
+```bash SQL
 SELECT * FROM cvm.fundos LIMIT 10;
+```
 
 ## 🔮 Próximos Passos
 O roadmap futuro deste projeto inclui a migração da solução local para uma arquitetura 100% serverless na nuvem AWS, visando maior escalabilidade, resiliência e automação.
