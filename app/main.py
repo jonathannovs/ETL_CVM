@@ -35,14 +35,21 @@ def main():
     logging.info('[# 1 -------- EXTRAINDO CVM ----------#]')
     time.sleep(5)
 
+    #instanciando a classe e passando o período que se quer extrair os dados, 
+    #caso não se passe as datas, irá pegar do dia 01/01/2022 até o dia atual.
     ext = ExtractCvm(bucket_name="s3-cvm-fii",start_date='2022-01-01',end_date='2023-12-01')
+
+    #criando Bucket s3 no Localstack
     ext.create_bucket()
+
+    #extraindo os dados de informes diários dos fundos e de informções sobre fundos
     ext.extract_info_diary(prefix='raw')
     ext.extract_infos_funds(prefix='raw_infos')
 
     logging.info('[# 2 -------- TRANSFORMANDO DADOS----------#]')
     time.sleep(5)
 
+    #instanciando a classe de transfomração e e passando a configuração spark
     tr = Transform(spark)
      
     # busca os dados do bucket raw do s3 e le e concatena em csv
@@ -54,7 +61,7 @@ def main():
     # recebe o df tratado e faz a junção com df com nome dos fundos
     df_join = tr.join_named_fund(df_transformed) 
     
-    # recebe o df que foi tratado e faz calculos            
+    # recebe o df que foi tratado e faz cálculos            
     df_metricas = tr.calculate_metricas(df_join)   
 
     # dicionario com tabela para inserir como chave e função como valor
@@ -64,15 +71,20 @@ def main():
     logging.info('[# 3 -------- CARREGANDO DADOS NO DATA WAREHOUSE ----------#]')
     time.sleep(5)
 
+    #instanciando a classe LoadDw e passando os acessos ao banco de dados como parâmetros
     load = LoadDw(spark,
                 host="postgres",
                 database=DB_NAME,
                 user=DB_USER,
                 password=DB_PASSWORD)
 
+    #criaçõa de tabelas
     load.create_table(filepath='/sql/create_tables.sql')
+
+    #inserção no banco de dados
     load.insert_data(schema='cvm', tables=lista_tabelas)
 
+    #exclusão dos arquivos parquet
     load.clean_temp_folder()
 
     logging.info('\u2705[#################### PIPELINE FINALIZADO #################]')
